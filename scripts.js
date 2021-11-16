@@ -38,9 +38,8 @@ const gameBoard = (() => {
 })();
 
 // Player factory function
-const Player = (name, symbol) => {
-
-    const getName = () => name;
+const Player = (name, type, symbol) => {
+    const getInfo = () => { return {name, type, symbol} };
 
     const makeMove = (square) => {
         if (gameBoard.checkSquareAvailable(square)) {
@@ -49,7 +48,7 @@ const Player = (name, symbol) => {
     }
 
     return {
-        getName,
+        getInfo,
         makeMove,
     }
 }

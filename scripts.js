@@ -44,6 +44,10 @@ const Player = (name, type, symbol) => {
     const makeMove = (square) => {
         if (gameBoard.checkSquareAvailable(square)) {
             gameBoard.fillSquare(symbol, square);
+            return true;
+        } else {
+            console.error('Square is already filled!');
+            return false;
         }
     }
 
@@ -53,6 +57,49 @@ const Player = (name, type, symbol) => {
     }
 }
 
+// Game module
+const game = (() => {
+    let player1 = null;
+    let player2 = null;
+    let currentPlayer = null;
+
+    // Start new game
+    const startGame = () => {
+        gameBoard.reset()
+        const board = gameBoard.getBoard();
+    }
+
+    // Create players and set current player
+    const createPlayers = () => {
+        player1 = Player('Bob', 'human', 'x');
+        player2 = Player('Tim', 'human', 'o');
+        currentPlayer = player1;
+    }
+
+    const getCurrentPlayer = () => currentPlayer;
+
+
+    // Handle current player (turns)
+    const switchPlayer = () => {
+        if (currentPlayer == player1) {
+            currentPlayer = player2;
+        } else {
+            currentPlayer = player1;
+        }
+    }
+    
+    // Check for a winner
+
+    startGame();
+    createPlayers();
+
+    return {
+        startGame,
+        getCurrentPlayer,
+        switchPlayer,
+    }
+})()
+
 // Display controller
 const displayController = (() => {
 
@@ -61,6 +108,7 @@ const displayController = (() => {
     const boardDisplay = app.querySelector('#board');
     const messageDisplay = app.querySelector('#messages');
     const controlsDisplay = app.querySelector('#controls');
+    const squares = boardDisplay.querySelectorAll('.square');
 
     // Render current gameboard state
     const render = () => {
@@ -71,18 +119,29 @@ const displayController = (() => {
         for (let i = 0; i < 9; i++) {
             const square = document.createElement('div');
             square.classList.add('square');
+            square.id = `square-${i}`;
             
-            // Check board sate to render
+            // Check board state to render
             if (board[i] != null) {
                 square.textContent = board[i];
             }
             
             // Render to page
             boardDisplay.appendChild(square);
+
+            // Add event listeners on available squares
+            if (board[i] === null) {
+                square.addEventListener('click', () => game.getCurrentPlayer().makeMove(i));
+                square.addEventListener('click', render);
+                square.addEventListener('click', game.switchPlayer);
+            }
+
         }
     }
 
     // Display winner
+
+    render();
 
     return {
         render
@@ -90,23 +149,5 @@ const displayController = (() => {
 
 })();
 
-// Game module
-const game = (() => {
-    // Start new game
-    const startGame = () => {
-        gameBoard.reset()
-        const board = gameBoard.getBoard();
-        displayController.render(board);
-    }
 
-    // Handle current player (turns)
-    
-    // Check for a winner
-
-    startGame();
-
-    return {
-        startGame,
-    }
-})()
 

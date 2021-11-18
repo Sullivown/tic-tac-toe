@@ -86,9 +86,18 @@ const game = (() => {
         } else {
             currentPlayer = player1;
         }
+
+        // *** TODO *** Add message stating whos turn it currently is
     }
     
     // Check for a winner
+    const checkWin = () => {
+        // Check horizontal square
+
+        // Check vertical squares
+
+        // Check diagonal squares
+    }
 
     startGame();
     createPlayers();
@@ -112,31 +121,50 @@ const displayController = (() => {
 
     // Render current gameboard state
     const render = () => {
+        // Remove event listeners
+        squares.forEach(square => {
+            square.removeEventListener('click', handleClick);
+        })
         const board = gameBoard.getBoard();
 
+        // Reset board display
         boardDisplay.innerHTML = '';
 
+        // Render squares
         for (let i = 0; i < 9; i++) {
             const square = document.createElement('div');
             square.classList.add('square');
-            square.id = `square-${i}`;
+            square.dataset.square = i;
             
             // Check board state to render
             if (board[i] != null) {
                 square.textContent = board[i];
             }
             
-            // Render to page
+            // Add to page
             boardDisplay.appendChild(square);
 
             // Add event listeners on available squares
             if (board[i] === null) {
-                square.addEventListener('click', () => game.getCurrentPlayer().makeMove(i));
-                square.addEventListener('click', render);
-                square.addEventListener('click', game.switchPlayer);
+                square.addEventListener('click', handleClick);
             }
 
         }
+    }
+
+    // Handle clicking on a square
+    const handleClick  = (event) => {
+        const squareNumber = event.target.dataset.square;
+        game.getCurrentPlayer().makeMove(squareNumber);
+        render();
+        game.switchPlayer();
+        displayMessage(`${game.getCurrentPlayer().getInfo().name}'s Turn`)
+    }
+
+    // Display message
+    const displayMessage = (message) => {
+        // Maybe add a timeout option parameter?
+        messageDisplay.textContent = message;
     }
 
     // Display winner

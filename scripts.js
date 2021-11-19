@@ -188,14 +188,18 @@ const displayController = (() => {
     const boardDisplay = app.querySelector('#board');
     const messageDisplay = app.querySelector('#messages');
     const controlsDisplay = app.querySelector('#controls');
-    const squares = boardDisplay.querySelectorAll('.square');
 
     // Render current gameboard state
     const render = () => {
-        // Remove event listeners
-        squares.forEach(square => {
-            square.removeEventListener('click', handleClick);
-        })
+        const squares = boardDisplay.querySelectorAll('.square');
+        if (squares) {
+            // Remove event listeners
+            squares.forEach(square => {
+                console.log(square);
+                square.removeEventListener('click', handleClick);
+            })
+        }
+
         const board = gameBoard.getBoard();
 
         // Reset board display
@@ -222,9 +226,12 @@ const displayController = (() => {
 
         }
     }
+
     const disableBoard = () => {
-        console.log('disable board')
+        const squares = boardDisplay.querySelectorAll('.square');
+        // Remove event listeners
         squares.forEach(square => {
+            console.log(square);
             square.removeEventListener('click', handleClick);
         })
     }

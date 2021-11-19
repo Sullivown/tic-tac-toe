@@ -62,6 +62,7 @@ const game = (() => {
     let player1 = null;
     let player2 = null;
     let currentPlayer = null;
+    let turnNumber = 0;
 
     // Start new game
     const startGame = () => {
@@ -89,10 +90,15 @@ const game = (() => {
 
     const makeMove = (square) => {
         currentPlayer.makeMove(square);
+        turnNumber += 1;
         displayController.render();
-        // Check for winner
-        if (checkWin()) {
-            displayController.displayMessage(`${currentPlayer.getInfo().name} wins!`);
+        // Check for winner or tie
+        if (checkBoard()) {
+            if (checkBoard() == 'tie') {
+                displayController.displayMessage(`It's a tie!`);
+            } else {
+                displayController.displayMessage(`${currentPlayer.getInfo().name} wins!`);
+            }
             displayController.disableBoard();
         } else {
             switchPlayer();
@@ -101,7 +107,7 @@ const game = (() => {
     }
     
     // Check for a winner
-    const checkWin = () => {
+    const checkBoard = () => {
         const board = gameBoard.getBoard();
         const convertedBoard = [];
 
@@ -164,7 +170,12 @@ const game = (() => {
             return 'o';
         }
 
-        // If no winner, return false
+        // Check if the board is full and therefore nobody has won
+        if (turnNumber === gameBoard.getBoard().length) {
+            return 'tie'
+        }
+
+        // If no winner and game is not over, return false
         return false;
     }
 
@@ -175,7 +186,7 @@ const game = (() => {
         startGame,
         getCurrentPlayer,
         switchPlayer,
-        checkWin,
+        checkBoard,
         makeMove,
     }
 })()
@@ -195,7 +206,6 @@ const displayController = (() => {
         if (squares) {
             // Remove event listeners
             squares.forEach(square => {
-                console.log(square);
                 square.removeEventListener('click', handleClick);
             })
         }
@@ -231,7 +241,6 @@ const displayController = (() => {
         const squares = boardDisplay.querySelectorAll('.square');
         // Remove event listeners
         squares.forEach(square => {
-            console.log(square);
             square.removeEventListener('click', handleClick);
         })
     }
@@ -250,6 +259,7 @@ const displayController = (() => {
     // Display winner
 
     render();
+    displayMessage(`${game.getCurrentPlayer().getInfo().name}'s Turn`);
 
     return {
         render,

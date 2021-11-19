@@ -78,7 +78,6 @@ const game = (() => {
 
     const getCurrentPlayer = () => currentPlayer;
 
-
     // Handle current player (turns)
     const switchPlayer = () => {
         if (currentPlayer == player1) {
@@ -86,17 +85,87 @@ const game = (() => {
         } else {
             currentPlayer = player1;
         }
+    }
 
-        // *** TODO *** Add message stating whos turn it currently is
+    const makeMove = (square) => {
+        currentPlayer.makeMove(square);
+        displayController.render();
+        // Check for winner
+        if (checkWin()) {
+            displayController.displayMessage(`${currentPlayer.getInfo().name} wins!`);
+            displayController.disableBoard();
+        } else {
+            switchPlayer();
+            displayController.displayMessage(`${currentPlayer.getInfo().name}'s Turn`);
+        }
     }
     
     // Check for a winner
     const checkWin = () => {
-        // Check horizontal square
+        const board = gameBoard.getBoard();
+        const convertedBoard = [];
 
+        for (let i = 0; i < board.length; i++) {
+            if (board[i] == 'x') {
+                convertedBoard.push(1);
+            } else if (board[i] == 'o') {
+                convertedBoard.push(-1);
+            } else {
+                convertedBoard.push(null);
+            }
+        }
+        
+        // Check horizontal squares
+        // 012, 345, 678
+        for (let i = 0; i < 7; i += 3) {
+            let rowTotal = 0;
+            for (let j = 0; j < 3; j++) {
+                rowTotal += convertedBoard[i + j];
+            }
+            if (rowTotal === 3) {
+                return 'x';
+            } else if (rowTotal === -3) {
+                return 'o';
+            }
+        }
         // Check vertical squares
+        // 036, 147, 258
+        for (let i = 0; i < 3; i++) {
+            let columnTotal = 0;
+            for (let j = 0; j < 7; j += 3) {
+                columnTotal += convertedBoard[i + j];
+            }
+            if (columnTotal === 3) {
+                return 'x';
+            } else if (columnTotal === -3) {
+                return 'o';
+            }
+        }
 
         // Check diagonal squares
+        // 048, 246
+        let diagonal1 = 0;
+        for (let i = 0; i < 9; i += 4) {
+            diagonal1 += convertedBoard[i];
+        }
+        if (diagonal1 === 3) {
+            return 'x';
+        } else if (diagonal1 === -3) {
+            return 'o';
+        }
+
+        let diagonal2 = 0;
+        for (let i = 2; i < 7; i += 2) {
+            diagonal2 += convertedBoard[i];
+        }
+        if (diagonal2 === 3) {
+            return 'x';
+        } else if (diagonal2 === -3) {
+            return 'o';
+        }
+
+        // If no winner, return false
+        return false;
     }
 
     startGame();
@@ -106,6 +175,8 @@ const game = (() => {
         startGame,
         getCurrentPlayer,
         switchPlayer,
+        checkWin,
+        makeMove,
     }
 })()
 
@@ -151,14 +222,16 @@ const displayController = (() => {
 
         }
     }
+    const disableBoard = () => {
+        console.log('disable board')
+        squares.forEach(square => {
+            square.removeEventListener('click', handleClick);
+        })
+    }
 
     // Handle clicking on a square
-    const handleClick  = (event) => {
-        const squareNumber = event.target.dataset.square;
-        game.getCurrentPlayer().makeMove(squareNumber);
-        render();
-        game.switchPlayer();
-        displayMessage(`${game.getCurrentPlayer().getInfo().name}'s Turn`)
+    const handleClick = (event) => {
+        game.makeMove(event.target.dataset.square);
     }
 
     // Display message
@@ -172,7 +245,9 @@ const displayController = (() => {
     render();
 
     return {
-        render
+        render,
+        disableBoard,
+        displayMessage,
     }
 
 })();

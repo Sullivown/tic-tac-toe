@@ -204,6 +204,8 @@ const displayController = (() => {
 
     // Render title screen
     const renderTitleScreen = () => {
+        app.innerHTML = '';
+        
         let titleScreen = document.createElement('div');
         titleScreen.className = 'title-screen';
         titleScreen.innerHTML = `

@@ -51,6 +51,8 @@ body {
     justify-content: center;
 }
 
+.player-select
+
 .player-select-item {
     flex-direction: column;
 }

@@ -65,15 +65,16 @@ const game = (() => {
     let turnNumber = 0;
 
     // Start new game
-    const startGame = () => {
+    const startGame = (players) => {
         gameBoard.reset()
         const board = gameBoard.getBoard();
+        createPlayers(players);
     }
 
     // Create players and set current player
-    const createPlayers = () => {
-        player1 = Player('Bob', 'human', 'x');
-        player2 = Player('Tim', 'human', 'o');
+    const createPlayers = (players) => {
+        player1 = Player(players.player1.name, players.player1.type, 'x');
+        player2 = Player(players.player2.name, players.player2.type, 'o');
         currentPlayer = player1;
     }
 
@@ -179,9 +180,6 @@ const game = (() => {
         return false;
     }
 
-    startGame();
-    createPlayers();
-
     return {
         startGame,
         getCurrentPlayer,
@@ -203,21 +201,31 @@ const displayController = (() => {
         titleScreen.className = 'title-screen';
         titleScreen.innerHTML = `
         <div class="player-select">
-            <div class="player-select-item">
-            <div>Player 1</div>
-                <input id="player1" type="text" placeholder="Player 1"></input>
+            <div id="player-1" class="player-select-item">
+                <div>Player 1</div>
+                <input name="player-name" type="text" placeholder="Player 1"></input>
+                <select>
+                    <option value="human">Human</option>
+                    <option value="ai-easy">Easy AI</option>
+                </select>
             </div>
-            <div class="player-select-item">
-            <div>Player 2</div>
-                <input id="player2" type="text" placeholder="Player 2"></input>
+            <div id="player-2" class="player-select-item">
+                <div>Player 2</div>
+                <input name="player-name" type="text" placeholder="Player 2"></input>
+                <select>
+                    <option value="human">Human</option>
+                    <option value="ai-easy">Easy AI</option>
+                </select>
             </div>
         </div>
         <div>
-            <button>Start Game</button>
+            <button id="start-game">Start Game</button>
         </div>
             `
 
         app.appendChild(titleScreen);
+
+        app.querySelector('#start-game').addEventListener('click', handleStartClick);
     }
 
     // Render current gameboard state
@@ -226,7 +234,7 @@ const displayController = (() => {
         if (squares) {
             // Remove event listeners
             squares.forEach(square => {
-                square.removeEventListener('click', handleClick);
+                square.removeEventListener('click', handleSquareClick);
             })
         }
 
@@ -263,7 +271,7 @@ const displayController = (() => {
 
             // Add event listeners on available squares
             if (board[i] === null) {
-                square.addEventListener('click', handleClick);
+                square.addEventListener('click', handleSquareClick);
             }
 
         }
@@ -277,13 +285,31 @@ const displayController = (() => {
         const squares = boardDisplay.querySelectorAll('.square');
         // Remove event listeners
         squares.forEach(square => {
-            square.removeEventListener('click', handleClick);
+            square.removeEventListener('click', handleSquareClick);
         })
     }
 
     // Handle clicking on a square
-    const handleClick = (event) => {
+    const handleSquareClick = (event) => {
         game.makeMove(event.target.dataset.square);
+    }
+
+    // Handle clicking start game
+    const handleStartClick = (event) => {
+        const player1Div = app.querySelector('#player-1');
+        const player2Div = app.querySelector('#player-2');
+        const players = {
+            player1: {
+                name: player1Div.querySelector('input[name="player-name"]').value,
+                type: player1Div.querySelector('select').value,
+            },
+            player2: {
+                name: player2Div.querySelector('input[name="player-name"]').value,
+                type: player2Div.querySelector('select').value,
+            },
+        }
+        game.startGame(players);
+        renderBoard();
     }
 
     // Display message

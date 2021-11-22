@@ -91,7 +91,7 @@ const game = (() => {
     const makeMove = (square) => {
         currentPlayer.makeMove(square);
         turnNumber += 1;
-        displayController.render();
+        displayController.renderBoard();
         // Check for winner or tie
         if (checkBoard()) {
             if (checkBoard() == 'tie') {
@@ -196,19 +196,51 @@ const displayController = (() => {
 
     // Cache DOM
     const app = document.querySelector('#app');
-    const boardDisplay = app.querySelector('#board');
-    const messageDisplay = app.querySelector('#messages');
-    const controlsDisplay = app.querySelector('#controls');
+
+    // Render title screen
+    const renderTitleScreen = () => {
+        let titleScreen = document.createElement('div');
+        titleScreen.className = 'title-screen';
+        titleScreen.innerHTML = `
+        <div class="player-select">
+            <div class="player-select-item">
+            <div>Player 1</div>
+                <input id="player1" type="text" placeholder="Player 1"></input>
+            </div>
+            <div class="player-select-item">
+            <div>Player 2</div>
+                <input id="player2" type="text" placeholder="Player 2"></input>
+            </div>
+        </div>
+        <div>
+            <button>Start Game</button>
+        </div>
+            `
+
+        app.appendChild(titleScreen);
+    }
 
     // Render current gameboard state
-    const render = () => {
-        const squares = boardDisplay.querySelectorAll('.square');
+    const renderBoard = () => {
+        const squares = app.querySelectorAll('.square');
         if (squares) {
             // Remove event listeners
             squares.forEach(square => {
                 square.removeEventListener('click', handleClick);
             })
         }
+
+        // Clear any current display elements
+        app.innerHTML = '';
+
+        let messageDisplay = document.createElement('div');
+        messageDisplay.className = 'messages';
+
+        let boardDisplay = document.createElement('div');
+        boardDisplay.className = 'board';
+
+        app.appendChild(messageDisplay);
+        app.appendChild(boardDisplay);
 
         const board = gameBoard.getBoard();
 
@@ -235,7 +267,11 @@ const displayController = (() => {
             }
 
         }
+        // Display current player's turn
+        displayMessage(`${game.getCurrentPlayer().getInfo().name}'s Turn`);
     }
+
+    // Render win screen
 
     const disableBoard = () => {
         const squares = boardDisplay.querySelectorAll('.square');
@@ -252,22 +288,20 @@ const displayController = (() => {
 
     // Display message
     const displayMessage = (message) => {
-        // Maybe add a timeout option parameter?
+        let messageDisplay = app.querySelector('.messages');
         messageDisplay.textContent = message;
     }
 
     // Display winner
 
-    render();
-    displayMessage(`${game.getCurrentPlayer().getInfo().name}'s Turn`);
+    renderTitleScreen();
 
     return {
-        render,
+        renderTitleScreen,
+        renderBoard,
         disableBoard,
         displayMessage,
     }
 
 })();
-
-
 

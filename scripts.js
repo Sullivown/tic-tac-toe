@@ -69,6 +69,7 @@ const game = (() => {
         gameBoard.reset()
         const board = gameBoard.getBoard();
         createPlayers(players);
+        turnNumber = 0;
     }
 
     // Create players and set current player
@@ -76,6 +77,10 @@ const game = (() => {
         player1 = Player(players.player1.name, players.player1.type, 'x');
         player2 = Player(players.player2.name, players.player2.type, 'o');
         currentPlayer = player1;
+    }
+
+    const getPlayers = () => {
+        return [player1, player2];
     }
 
     const getCurrentPlayer = () => currentPlayer;
@@ -101,6 +106,7 @@ const game = (() => {
                 displayController.displayMessage(`${currentPlayer.getInfo().name} wins!`);
             }
             displayController.disableBoard();
+            displayController.renderGameEnd();
         } else {
             switchPlayer();
             displayController.displayMessage(`${currentPlayer.getInfo().name}'s Turn`);
@@ -182,6 +188,7 @@ const game = (() => {
 
     return {
         startGame,
+        getPlayers,
         getCurrentPlayer,
         switchPlayer,
         checkBoard,
@@ -282,7 +289,7 @@ const displayController = (() => {
     // Render win screen
 
     const disableBoard = () => {
-        const squares = boardDisplay.querySelectorAll('.square');
+        const squares = document.querySelectorAll('.square');
         // Remove event listeners
         squares.forEach(square => {
             square.removeEventListener('click', handleSquareClick);
@@ -296,18 +303,35 @@ const displayController = (() => {
 
     // Handle clicking start game
     const handleStartClick = (event) => {
-        const player1Div = app.querySelector('#player-1');
-        const player2Div = app.querySelector('#player-2');
-        const players = {
-            player1: {
-                name: player1Div.querySelector('input[name="player-name"]').value,
-                type: player1Div.querySelector('select').value,
-            },
-            player2: {
-                name: player2Div.querySelector('input[name="player-name"]').value,
-                type: player2Div.querySelector('select').value,
-            },
+        let players = {};
+        console.log(event.target.id)
+
+        if (event.target.id == "restart") {
+            players = {
+                player1: {
+                    name: game.getPlayers()[0].getInfo().name,
+                    type: game.getPlayers()[0].getInfo().type,
+                },
+                player2: {
+                    name: game.getPlayers()[1].getInfo().name,
+                    type: game.getPlayers()[1].getInfo().type,
+                }
+            }
+        } else {
+            const player1Div = app.querySelector('#player-1');
+            const player2Div = app.querySelector('#player-2');
+            players = {
+                player1: {
+                    name: player1Div.querySelector('input[name="player-name"]').value || 'Player 1',
+                    type: player1Div.querySelector('select').value,
+                },
+                player2: {
+                    name: player2Div.querySelector('input[name="player-name"]').value || 'Player 2',
+                    type: player2Div.querySelector('select').value,
+                },
+            }
         }
+
         game.startGame(players);
         renderBoard();
     }
@@ -319,6 +343,20 @@ const displayController = (() => {
     }
 
     // Display winner
+    const renderGameEnd = () => {
+        const endDiv = document.createElement('div');
+        endDiv.innerHTML = `
+            <button id="restart">Play Again?</button>
+            <button id="reset">Change Settings</button>
+        `
+        app.appendChild(endDiv);
+
+        const restartButton = app.querySelector('#restart');
+        const resetButton = app.querySelector('#reset');
+
+        restartButton.addEventListener('click', handleStartClick);
+        resetButton.addEventListener('click', renderTitleScreen)
+    }
 
     renderTitleScreen();
 
@@ -327,6 +365,7 @@ const displayController = (() => {
         renderBoard,
         disableBoard,
         displayMessage,
+        renderGameEnd,
     }
 
 })();

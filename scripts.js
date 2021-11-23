@@ -92,6 +92,13 @@ const game = (() => {
         } else {
             currentPlayer = player1;
         }
+
+        // If the current player is an AI, make a move
+        if (currentPlayer.getInfo().type !== 'human') {
+            console.log('SWITCHING TO AI MOVE')
+            const aiMove = ai.getMove(currentPlayer.getInfo().type)
+            makeMove(aiMove);
+        }
     }
 
     const makeMove = (square) => {
@@ -205,7 +212,7 @@ const displayController = (() => {
     // Render title screen
     const renderTitleScreen = () => {
         app.innerHTML = '';
-        
+
         let titleScreen = document.createElement('div');
         titleScreen.className = 'title-screen';
         titleScreen.innerHTML = `
@@ -223,7 +230,9 @@ const displayController = (() => {
                 <input name="player-name" type="text" placeholder="Player 2"></input>
                 <select>
                     <option value="human">Human</option>
-                    <option value="ai-easy">Easy AI</option>
+                    <option value="easy">Easy AI</option>
+                    <option value="hard">Hard AI</option>
+                    <option value="unbeatable">Unbeatable AI</option>
                 </select>
             </div>
         </div>
@@ -306,7 +315,6 @@ const displayController = (() => {
     // Handle clicking start game
     const handleStartClick = (event) => {
         let players = {};
-        console.log(event.target.id)
 
         if (event.target.id == "restart") {
             players = {
@@ -372,3 +380,35 @@ const displayController = (() => {
 
 })();
 
+// AI module
+const ai = (() => {
+    // Get available moves
+    const getAvailableMoves = () => gameBoard.getBoard().reduce((arr, space, currentIndex) => {
+        if (space === null) {
+            arr.push(currentIndex)
+        }
+        return arr;
+    },[]);
+
+    // Which moves are made will differ based on the difficulty setting of the AI
+    const getMove = (difficulty) => {
+        if (difficulty == 'easy') {
+            console.log('This is an easy AI!');
+            // Return random move
+            const randomNum = Math.floor(Math.random() * getAvailableMoves().length);
+            return getAvailableMoves()[randomNum];
+
+        } else if (difficulty == 'hard') {
+            console.log('This is a hard AI!');
+
+        } else {
+            console.log('This is something else entirely')
+
+        }
+    }
+
+    return {
+        getMove,
+        getAvailableMoves,
+    }
+})();

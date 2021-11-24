@@ -102,12 +102,13 @@ const game = (() => {
     }
 
     const makeMove = (square) => {
+        const board = gameBoard.getBoard();
         currentPlayer.makeMove(square);
         turnNumber += 1;
         displayController.renderBoard();
         // Check for winner or tie
-        if (checkBoard()) {
-            if (checkBoard() == 'tie') {
+        if (checkBoard(board)) {
+            if (checkBoard(board) == 'tie') {
                 displayController.displayMessage(`It's a tie!`);
             } else {
                 displayController.displayMessage(`${currentPlayer.getInfo().name} wins!`);
@@ -121,8 +122,7 @@ const game = (() => {
     }
     
     // Check for a winner
-    const checkBoard = () => {
-        const board = gameBoard.getBoard();
+    const checkBoard = (board) => {
         const convertedBoard = [];
 
         for (let i = 0; i < board.length; i++) {
@@ -408,19 +408,54 @@ const ai = (() => {
     }
 
     //The result function takes a board and an action as input, and should return a new board state, without modifying the original board.
-    const result = (board, action) => {
+    const result = (board, player, action) => {
         if (board[action] != null) {
             throw 'Action is not valid on given board!';
         }
+
+        let boardCopy = [...board];
+        boardCopy[action] = player;
+
+        return boardCopy;
     }
 
     //The winner function should accept a board as input, and return the winner of the board if there is one.
+    const winner = (board) => {
+        const winnerCheck = game.checkBoard(board);
+        if (winnerCheck == 'tie' || winnerCheck == false) {
+            return 'none';
+        } else {
+            return winnerCheck;
+        }
+    }
 
     //The terminal function should accept a board as input, and return a boolean value indicating whether the game is over.
+    /* If the game is over, either because someone has won the game or because all cells have been filled without anyone winning, the function should return True.
+        Otherwise, the function should return False if the game is still in progress. */
+    const terminal = (board) => {
+        const terminalCheck = game.checkBoard(board);
+        if (terminalCheck != false) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     //The utility function should accept a terminal board as input and output the utility of the board.
+    const utility = (board) => {
+        const utilityCheck = game.checkBoard(board);
+        if (utilityCheck == 'x') {
+            return 1;
+        } else if (utilityCheck == 'o') {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
 
     //The minimax function should take a board as input, and return the optimal move for the player to move on that board.
+    /* The move returned should be the optimal action (i, j) that is one of the allowable actions on the board. If multiple moves are equally optimal, any of those moves is acceptable.
+    If the board is a terminal board, the minimax function should return None. */
 
     return {
         getMove,

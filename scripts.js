@@ -407,6 +407,21 @@ const ai = (() => {
         }
     }
 
+    //The result function takes a board and an action as input, and should return a new board state, without modifying the original board.
+    const result = (board, action) => {
+        if (board[action] != null) {
+            throw 'Action is not valid on given board!';
+        }
+    }
+
+    //The winner function should accept a board as input, and return the winner of the board if there is one.
+
+    //The terminal function should accept a board as input, and return a boolean value indicating whether the game is over.
+
+    //The utility function should accept a terminal board as input and output the utility of the board.
+
+    //The minimax function should take a board as input, and return the optimal move for the player to move on that board.
+
     return {
         getMove,
         getAvailableMoves,

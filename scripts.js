@@ -62,14 +62,12 @@ const game = (() => {
     let player1 = null;
     let player2 = null;
     let currentPlayer = null;
-    let turnNumber = 0;
 
     // Start new game
     const startGame = (players) => {
         gameBoard.reset()
         const board = gameBoard.getBoard();
         createPlayers(players);
-        turnNumber = 0;
     }
 
     // Create players and set current player
@@ -93,6 +91,8 @@ const game = (() => {
             currentPlayer = player1;
         }
 
+        displayController.displayMessage(`${currentPlayer.getInfo().name}'s Turn`);
+
         // If the current player is an AI, make a move
         if (currentPlayer.getInfo().type !== 'human') {
             console.log('SWITCHING TO AI MOVE')
@@ -104,9 +104,10 @@ const game = (() => {
     const makeMove = (square) => {
         const board = gameBoard.getBoard();
         currentPlayer.makeMove(square);
-        turnNumber += 1;
         displayController.renderBoard();
         // Check for winner or tie
+        console.log(checkBoard(board));
+ 
         if (checkBoard(board)) {
             if (checkBoard(board) == 'tie') {
                 displayController.displayMessage(`It's a tie!`);
@@ -117,19 +118,21 @@ const game = (() => {
             displayController.renderGameEnd();
         } else {
             switchPlayer();
-            displayController.displayMessage(`${currentPlayer.getInfo().name}'s Turn`);
         }
     }
     
     // Check for a winner
     const checkBoard = (board) => {
-        const convertedBoard = [];
+        let convertedBoard = [];
+        let filledSquares = 0;
 
         for (let i = 0; i < board.length; i++) {
             if (board[i] == 'x') {
                 convertedBoard.push(1);
+                filledSquares += 1;
             } else if (board[i] == 'o') {
                 convertedBoard.push(-1);
+                filledSquares +=1;
             } else {
                 convertedBoard.push(null);
             }
@@ -185,7 +188,7 @@ const game = (() => {
         }
 
         // Check if the board is full and therefore nobody has won
-        if (turnNumber === gameBoard.getBoard().length) {
+        if (filledSquares == board.length) {
             return 'tie'
         }
 
@@ -382,14 +385,6 @@ const displayController = (() => {
 
 // AI module
 const ai = (() => {
-    // Get available moves
-    const getAvailableMoves = (board) => board.reduce((arr, space, currentIndex) => {
-        if (space === null) {
-            arr.push(currentIndex)
-        }
-        return arr;
-    },[]);
-
     // Which moves are made will differ based on the difficulty setting of the AI
     const getMove = (difficulty) => {
         if (difficulty == 'easy') {
@@ -403,11 +398,18 @@ const ai = (() => {
 
         } else {
             console.log('This is something else entirely')
-            console.log('minimax move: ' + miniMax(gameBoard.getBoard(), game.getCurrentPlayer().symbol));
             return miniMax(gameBoard.getBoard(), game.getCurrentPlayer().symbol);
 
         }
     }
+
+    // Get available moves
+    const getAvailableMoves = (board) => board.reduce((arr, space, currentIndex) => {
+        if (space === null) {
+            arr.push(currentIndex)
+        }
+        return arr;
+    },[]);
 
     //The result function takes a board and an action as input, and should return a new board state, without modifying the original board.
     const result = (board, player, move) => {
@@ -456,7 +458,7 @@ const ai = (() => {
     }
 
     //The minimax function should take a board as input, and return the optimal move for the player to move on that board.
-    /* The move returned should be the optimal action (i, j) that is one of the allowable actions on the board. If multiple moves are equally optimal, any of those moves is acceptable.
+    /* The move returned should be the optimal action that is one of the allowable actions on the board. If multiple moves are equally optimal, any of those moves is acceptable.
     If the board is a terminal board, the minimax function should return None. */
 
     const miniMax = (board, player) => {
@@ -464,19 +466,19 @@ const ai = (() => {
 
             let optimalAction = null;
 
-            // If board is terminal return 'none'
+            // If board is terminal return  
             if (terminal(board)) {
                 return [utility(board), optimalAction];
             } else {
                 // initialize variable to -100
-                const v = -100;
+                let v = -100;
                 const availableMoves = getAvailableMoves(board);
                 // cycle through each possible action
                 for (let i = 0; i < availableMoves.length; i++) {
 
                     //# run minValue for all actions and see the highest score
                     const otherPlayer = (player == 'x') ? 'o' : 'x';
-                    let best = minValue(result(board, otherPlayer, availableMoves[i]));
+                    let best = minValue(result(board, player, availableMoves[i]), otherPlayer)[0];
                     // # if the best is higher than v, set the optimal action to that action
                     if (best > v) {
                         v = best;
@@ -494,19 +496,19 @@ const ai = (() => {
 
             let optimalAction = null;
 
-            // If board is terminal return 'none'
+            // If board is terminal return
             if (terminal(board)) {
                 return [utility(board), optimalAction];
             } else {
                 // initialize variable to -100
-                const v = 100;
+                let v = 100;
                 const availableMoves = getAvailableMoves(board);
                 // cycle through each possible action
                 for (let i = 0; i < availableMoves.length; i++) {
                     //# run minValue for all actions and see the highest score
                     const otherPlayer = (player == 'x') ? 'o' : 'x';
-                    console.log(maxValue(result(board, otherPlayer, availableMoves[i])))
-                    let best = maxValue(result(board, otherPlayer, availableMoves[i]));
+                
+                    let best = maxValue(result(board, player, availableMoves[i]), otherPlayer)[0];
                     // # if the best is higher than v, set the optimal action to that action
                     if (best < v) {
                         v = best;

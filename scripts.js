@@ -106,7 +106,6 @@ const game = (() => {
         currentPlayer.makeMove(square);
         displayController.renderBoard();
         // Check for winner or tie
-        console.log(checkBoard(board));
  
         if (checkBoard(board)) {
             if (checkBoard(board) == 'tie') {
@@ -423,20 +422,11 @@ const ai = (() => {
         return boardCopy;
     }
 
-    //The winner function should accept a board as input, and return the winner of the board if there is one.
-    const winner = (board) => {
-        const winnerCheck = game.checkBoard(board);
-        if (winnerCheck == 'tie' || winnerCheck == false) {
-            return 'none';
-        } else {
-            return winnerCheck;
-        }
-    }
-
     //The terminal function should accept a board as input, and return a boolean value indicating whether the game is over.
     /* If the game is over, either because someone has won the game or because all cells have been filled without anyone winning, the function should return True.
         Otherwise, the function should return False if the game is still in progress. */
     const terminal = (board) => {
+ 
         const terminalCheck = game.checkBoard(board);
         if (terminalCheck != false) {
             return true;
@@ -500,7 +490,7 @@ const ai = (() => {
             if (terminal(board)) {
                 return [utility(board), optimalAction];
             } else {
-                // initialize variable to -100
+                // initialize variable to 100
                 let v = 100;
                 const availableMoves = getAvailableMoves(board);
                 // cycle through each possible action
@@ -517,7 +507,6 @@ const ai = (() => {
                 }
 
                 // return v and the optimal action
-                console.log('optimal action minval: ' + optimalAction)
                 return [v, optimalAction];
             }
 
@@ -528,12 +517,14 @@ const ai = (() => {
         }
 
         // determine player and return optimal action
-        if (game.getCurrentPlayer() == 'x') {
-            console.log('best x move: ' + maxValue(board, player)[1]);
-            return maxValue(board, player)[1];
+        if (player == 'x') {
+            let bestMove = maxValue(board, player)[1];
+            console.log(bestMove);
+            return bestMove;
         } else {
-            console.log('best o move: ' + minValue(board, player)[1]);
-            return minValue(board, player)[1];
+            let bestMove = minValue(board, player)[1];
+            console.log(bestMove);
+            return bestMove;
         }
     }
 

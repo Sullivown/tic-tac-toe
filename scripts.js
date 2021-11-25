@@ -224,7 +224,9 @@ const displayController = (() => {
                 <input name="player-name" type="text" placeholder="Player 1"></input>
                 <select>
                     <option value="human">Human</option>
-                    <option value="ai-easy">Easy AI</option>
+                    <option value="easy">Easy AI</option>
+                    <option value="hard">Hard AI</option>
+                    <option value="unbeatable">Unbeatable AI</option>
                 </select>
             </div>
             <div id="player-2" class="player-select-item">
@@ -387,22 +389,23 @@ const ai = (() => {
     // Which moves are made will differ based on the difficulty setting of the AI
     const getMove = (difficulty) => {
         if (difficulty == 'easy') {
-            console.log('This is an easy AI!');
-            // Return random move
-            const randomNum = Math.floor(Math.random() * getAvailableMoves(gameBoard.getBoard()).length);
-            return getAvailableMoves(gameBoard.getBoard())[randomNum];
-
+            // Easy AI makes random moves
+            return getRandomMove();
         } else if (difficulty == 'hard') {
-            console.log('This is a hard AI!');
-
+            // Hard AI makes an optimal move 60% of the time and a random move 40% of the time
+            if (Math.floor(Math.random() * 10 <= 6)) {
+                return miniMax(gameBoard.getBoard(), game.getCurrentPlayer().getInfo().symbol);
+            } else {
+                return getRandomMove();
+            }
         } else {
-            console.log('This is an impossible AI!');
+            // Impossible AI always makes an optimal move
             return miniMax(gameBoard.getBoard(), game.getCurrentPlayer().getInfo().symbol);
 
         }
     }
 
-    // Get available moves
+    // Get available moves for given board
     const getAvailableMoves = (board) => board.reduce((arr, space, currentIndex) => {
         if (space === null) {
             arr.push(currentIndex)
@@ -410,7 +413,14 @@ const ai = (() => {
         return arr;
     },[]);
 
-    //The result function takes a board and an action as input, and should return a new board state, without modifying the original board.
+    // Return random move
+    const getRandomMove = () => {
+        const randomNum = Math.floor(Math.random() * getAvailableMoves(gameBoard.getBoard()).length);
+        return getAvailableMoves(gameBoard.getBoard())[randomNum];
+    }
+
+
+    //The result function takes a board and an action as input, and returns a new board state (without modifying the original board).
     const result = (board, player, move) => {
         if (board[move] != null) {
             throw 'Action is not valid on given board!';
@@ -422,9 +432,7 @@ const ai = (() => {
         return boardCopy;
     }
 
-    //The terminal function should accept a board as input, and return a boolean value indicating whether the game is over.
-    /* If the game is over, either because someone has won the game or because all cells have been filled without anyone winning, the function should return True.
-        Otherwise, the function should return False if the game is still in progress. */
+    // The terminal function accepts a board as input, and returns a boolean value indicating whether the game is over.
     const terminal = (board) => {
  
         const terminalCheck = game.checkBoard(board);
@@ -435,7 +443,7 @@ const ai = (() => {
         }
     }
 
-    //The utility function should accept a terminal board as input and output the utility of the board.
+    // The utility accepts a terminal board as input and outputs the utility of the board.
     const utility = (board) => {
         const utilityCheck = game.checkBoard(board);
         if (utilityCheck == 'x') {
@@ -447,11 +455,10 @@ const ai = (() => {
         }
     }
 
-    //The minimax function takes a board and player as input, and returns an optimal move for the player to move on that board.
+    // The minimax function takes a board and player as input, and returns an optimal move for the player to move on that board.
 
     const miniMax = (board, player) => {
         const maxValue = (board, player) => {
-
             let optimalAction = null;
 
             // If board is terminal return  
@@ -461,13 +468,14 @@ const ai = (() => {
                 // initialize variable to -100
                 let v = -100;
                 const availableMoves = getAvailableMoves(board);
+
                 // cycle through each possible action
                 for (let i = 0; i < availableMoves.length; i++) {
-
-                    //# run minValue for all actions and see the highest score
+                    // run minValue for all actions and see the highest score
                     const otherPlayer = (player == 'x') ? 'o' : 'x';
                     let best = minValue(result(board, player, availableMoves[i]), otherPlayer)[0];
-                    // # if the best is higher than v, set the optimal action to that action
+
+                    // if the best is higher than v, set the optimal action to that action
                     if (best > v) {
                         v = best;
                         optimalAction = availableMoves[i];
@@ -477,11 +485,9 @@ const ai = (() => {
                 // return v and the optimal action
                 return [v, optimalAction];
             }
-
         }
 
         const minValue = (board, player) => {
-
             let optimalAction = null;
 
             // If board is terminal return
@@ -491,13 +497,14 @@ const ai = (() => {
                 // initialize variable to 100
                 let v = 100;
                 const availableMoves = getAvailableMoves(board);
+
                 // cycle through each possible action
                 for (let i = 0; i < availableMoves.length; i++) {
-                    //# run minValue for all actions and see the highest score
+                    // run maxValue for all actions and see the highest score
                     const otherPlayer = (player == 'x') ? 'o' : 'x';
-                
                     let best = maxValue(result(board, player, availableMoves[i]), otherPlayer)[0];
-                    // # if the best is higher than v, set the optimal action to that action
+
+                    // if the best is higher than v, set the optimal action to that action
                     if (best < v) {
                         v = best;
                         optimalAction = availableMoves[i];
@@ -507,7 +514,6 @@ const ai = (() => {
                 // return v and the optimal action
                 return [v, optimalAction];
             }
-
         }
 
         // determine player and return optimal action

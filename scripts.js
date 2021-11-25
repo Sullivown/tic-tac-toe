@@ -396,8 +396,8 @@ const ai = (() => {
             console.log('This is a hard AI!');
 
         } else {
-            console.log('This is something else entirely')
-            return miniMax(gameBoard.getBoard(), game.getCurrentPlayer().symbol);
+            console.log('This is an impossible AI!');
+            return miniMax(gameBoard.getBoard(), game.getCurrentPlayer().getInfo().symbol);
 
         }
     }
@@ -447,9 +447,7 @@ const ai = (() => {
         }
     }
 
-    //The minimax function should take a board as input, and return the optimal move for the player to move on that board.
-    /* The move returned should be the optimal action that is one of the allowable actions on the board. If multiple moves are equally optimal, any of those moves is acceptable.
-    If the board is a terminal board, the minimax function should return None. */
+    //The minimax function takes a board and player as input, and returns an optimal move for the player to move on that board.
 
     const miniMax = (board, player) => {
         const maxValue = (board, player) => {
@@ -512,19 +510,12 @@ const ai = (() => {
 
         }
 
-        if (terminal(board)) {
-            return 'none';
-        }
-
         // determine player and return optimal action
+        console.log(player)
         if (player == 'x') {
-            let bestMove = maxValue(board, player)[1];
-            console.log(bestMove);
-            return bestMove;
+            return maxValue(board, player)[1];
         } else {
-            let bestMove = minValue(board, player)[1];
-            console.log(bestMove);
-            return bestMove;
+            return minValue(board, player)[1];
         }
     }
 

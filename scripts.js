@@ -93,12 +93,6 @@ const game = (() => {
 
         displayController.displayMessage(`${currentPlayer.getInfo().name}'s Turn`);
 
-        // If the current player is an AI, make a move
-        if (currentPlayer.getInfo().type !== 'human') {
-            console.log('SWITCHING TO AI MOVE')
-            const aiMove = ai.getMove(currentPlayer.getInfo().type)
-            makeMove(aiMove);
-        }
     }
 
     const makeMove = (square) => {
@@ -106,17 +100,23 @@ const game = (() => {
         currentPlayer.makeMove(square);
         displayController.renderBoard();
         // Check for winner or tie
- 
         if (checkBoard(board)) {
-            if (checkBoard(board) == 'tie') {
+            if (checkBoard(board) === 'tie') {
                 displayController.displayMessage(`It's a tie!`);
             } else {
+                console.log('winner!')
                 displayController.displayMessage(`${currentPlayer.getInfo().name} wins!`);
             }
             displayController.disableBoard();
             displayController.renderGameEnd();
         } else {
             switchPlayer();
+
+            // If the current player is an AI, make a move
+            if (currentPlayer.getInfo().type !== 'human') {
+                const aiMove = ai.getMove(currentPlayer.getInfo().type)
+                makeMove(aiMove);
+            }
         }
     }
     
@@ -185,7 +185,7 @@ const game = (() => {
         } else if (diagonal2 === -3) {
             return 'o';
         }
-
+        
         // Check if the board is full and therefore nobody has won
         if (filledSquares == board.length) {
             return 'tie'
@@ -348,6 +348,12 @@ const displayController = (() => {
 
         game.startGame(players);
         renderBoard();
+
+        // Make AI move if Player 1 is set to AI
+        if (game.getCurrentPlayer().getInfo().type !== 'human') {
+            const aiMove = ai.getMove(game.getCurrentPlayer().getInfo().type);
+            game.makeMove(aiMove);
+        }
     }
 
     // Display message
@@ -456,7 +462,6 @@ const ai = (() => {
     }
 
     // The minimax function takes a board and player as input, and returns an optimal move for the player to move on that board.
-
     const miniMax = (board, player) => {
         const maxValue = (board, player) => {
             let optimalAction = null;
@@ -479,6 +484,11 @@ const ai = (() => {
                     if (best > v) {
                         v = best;
                         optimalAction = availableMoves[i];
+                    }
+
+                    // if a best case optimal move has been found, break the loop
+                    if (best === 1) {
+                        break;
                     }
                 }
 
@@ -509,6 +519,11 @@ const ai = (() => {
                         v = best;
                         optimalAction = availableMoves[i];
                     }
+
+                    // if a best case optimal move has been found, break the loop
+                    if (best === -1) {
+                        break;
+                    }
                 }
 
                 // return v and the optimal action
@@ -517,7 +532,6 @@ const ai = (() => {
         }
 
         // determine player and return optimal action
-        console.log(player)
         if (player == 'x') {
             return maxValue(board, player)[1];
         } else {
@@ -527,6 +541,5 @@ const ai = (() => {
 
     return {
         getMove,
-        getAvailableMoves,
     }
 })();

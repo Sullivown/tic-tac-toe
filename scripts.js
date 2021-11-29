@@ -104,7 +104,6 @@ const game = (() => {
             if (checkBoard(board) === 'tie') {
                 displayController.displayMessage(`It's a tie!`);
             } else {
-                console.log('winner!')
                 displayController.displayMessage(`${currentPlayer.getInfo().name} wins!`);
             }
             displayController.disableBoard();
@@ -218,10 +217,11 @@ const displayController = (() => {
         let titleScreen = document.createElement('div');
         titleScreen.className = 'title-screen';
         titleScreen.innerHTML = `
+        <h1>Tic-Tac-Toe</h1>
         <div class="player-select">
             <div id="player-1" class="player-select-item">
                 <div>Player 1</div>
-                <input name="player-name" type="text" placeholder="Player 1"></input>
+                <input name="player-name" type="text" placeholder="Player 1 Name"></input>
                 <select>
                     <option value="human">Human</option>
                     <option value="easy">Easy AI</option>
@@ -231,7 +231,7 @@ const displayController = (() => {
             </div>
             <div id="player-2" class="player-select-item">
                 <div>Player 2</div>
-                <input name="player-name" type="text" placeholder="Player 2"></input>
+                <input name="player-name" type="text" placeholder="Player 2 Name"></input>
                 <select>
                     <option value="human">Human</option>
                     <option value="easy">Easy AI</option>
@@ -269,8 +269,12 @@ const displayController = (() => {
         let boardDisplay = document.createElement('div');
         boardDisplay.className = 'board';
 
+        let controlsDisplay = document.createElement('div');
+        controlsDisplay.className = 'controls';
+
         app.appendChild(messageDisplay);
         app.appendChild(boardDisplay);
+        app.appendChild(controlsDisplay);
 
         const board = gameBoard.getBoard();
 
@@ -285,7 +289,7 @@ const displayController = (() => {
             
             // Check board state to render
             if (board[i] != null) {
-                square.textContent = board[i];
+                square.textContent = board[i].toUpperCase();
             }
             
             // Add to page
@@ -364,12 +368,14 @@ const displayController = (() => {
 
     // Display winner
     const renderGameEnd = () => {
+        const controlsDiv = app.querySelector('.controls');
         const endDiv = document.createElement('div');
+        endDiv.className = 'end-div';
         endDiv.innerHTML = `
-            <button id="restart">Play Again?</button>
+            <button id="restart">Play Again</button>
             <button id="reset">Change Settings</button>
         `
-        app.appendChild(endDiv);
+        controlsDiv.appendChild(endDiv);
 
         const restartButton = app.querySelector('#restart');
         const resetButton = app.querySelector('#reset');
